@@ -408,11 +408,11 @@ globalkeys = gears.table.join(
 )
 
 
---FullScreen Keybiding
-cclientkeys = gears.table.join(
+--
+clientkeys = gears.table.join(
     
 -- Close Clients
-awful.key({ modkey,		  }, "q",      function (c) c:kill()             end,
+awful.key({ modkey }, "c",      function (c) c:kill()             end,
           {description = "close", group = "client"}),
 
 
