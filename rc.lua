@@ -27,7 +27,10 @@ require("awful.hotkeys_popup.keys")
 --beautiful.font = "Ubuntu 8"
 
 
---  | Error handling
+------------------------------------------------
+-------------------- ERROR ---------------------
+------------------------------------------------
+
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
 if awesome.startup_errors then
@@ -50,6 +53,11 @@ do
     end)
 end
 -- }}}
+
+
+------------------------------------------------
+------------------- OPTIONS --------------------
+------------------------------------------------
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
@@ -80,7 +88,10 @@ awful.layout.layouts = {
 }
 -- }}}
 
--- {{{ Menu
+------------------------------------------------
+-------------------- MENU ----------------------
+------------------------------------------------
+
 -- Create a launcher widget and a main menu
 myawesomemenu = {
    { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
@@ -101,7 +112,6 @@ mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
-
 
 
 ------------------------------------------------
