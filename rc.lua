@@ -61,8 +61,8 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init(gears.filesystem.get_themes_dir() .. "darkblue/theme.lua")
-beautiful.font = "Ubuntu 8"
+beautiful.init(gears.filesystem.get_themes_dir() .. "mytheme/theme.lua")
+--beautiful.font = "Ubuntu 8"
 
 -- This is used later as the default terminal and editor to run.
 terminal = "alacritty"
@@ -81,7 +81,7 @@ modkey = "Mod4"
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
     awful.layout.suit.spiral.dwindle,
-    awful.layout.suit.spiral,
+    --awful.layout.suit.spiral,
     awful.layout.suit.tile,
     awful.layout.suit.tile.left,
     --awful.layout.suit.floating
@@ -119,7 +119,8 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 ------------------------------------------------
 
 -- Separator Blanc
-tbox_separator2 = wibox.widget.textbox(" ")
+tbox_separator2 = wibox.widget.textbox("  ")
+tbox_separator1 = wibox.widget.textbox(" ")
 
 -- Separator
 tbox_separator = wibox.widget.textbox("| ")
@@ -236,7 +237,7 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ "일", "이", "삼" }, s, awful.layout.layouts[1])
+    awful.tag({"P", "ᗣ", "ᗧ", "•••", "M", "ᗣ", "N" }, s, awful.layout.layouts[1])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -270,9 +271,13 @@ awful.screen.connect_for_each_screen(function(s)
         layout = wibox.layout.align.horizontal,
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
-            mylauncher,
-            s.mytaglist,
+            tbox_separato1,
+	    --mylauncher,
+	    tbox_separator2,
+	    s.mytaglist,
+	    tbox_separator1,
             s.mypromptbox,
+	    tbox_separator1,
         },
         s.mytasklist, -- Middle widget
         { -- Right widgets
@@ -282,6 +287,7 @@ awful.screen.connect_for_each_screen(function(s)
             wibox.widget.systray(),
             mytextclock,
             s.mylayoutbox,
+	    tbox_separator1
         },
     }
 end)
@@ -408,7 +414,7 @@ globalkeys = gears.table.join(
 )
 
 
---
+--Layout Manipulation 
 clientkeys = gears.table.join(
     
 -- Close Clients
@@ -659,8 +665,8 @@ client.connect_signal("mouse::enter", function(c)
     c:emit_signal("request::activate", "mouse_enter", {raise = false})
 end)
 
-client.connect_signal("focus", function(c)  end)
-client.connect_signal("unfocus", function(c)  end)
+client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus  end)
+client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal  end)
 
 -------------------------------------------------
 --------------------- GAPS ----------------------
@@ -673,7 +679,9 @@ beautiful.useless_gap = 4
 ------------------------------------------------
 awful.spawn.with_shell("nitrogen --restore")
 --awful.spawn.with_shell('polkit-xfce-authentication-agent-1') --autorization app to usb and external hdd
-awful.spawn.with_shell('xset r rate 300 50') --to not let the screen sleep
-awful.spawn.with_shell('xset s off')         --to not let the screen sleep
---awful.spawn.with_shell('xset -dpms')
---awful.spawn.with_shell('picom --experimental-backends') 
+awful.spawn.with_shell("xset r rate 300 50") --to not let the screen sleep
+awful.spawn.with_shell("xset s off")         --to not let the screen sleep
+--awful.spawn.with_shell("xrandr --output eDR --primary --mode 1366x768 --rate 60.00 --output HDMI-A-0 --mode 2560x1080 --rate75.00 --left-of eDP")
+--awful.spawn.with_shell("!xrandr --restore")
+--awful.spawn.with_shell("xset -dpms")
+--awful.spawn.with_shell("picom --experimental-backends") 
