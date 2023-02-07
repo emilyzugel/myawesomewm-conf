@@ -12,9 +12,9 @@ local awful = require("awful")
             require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
---local watch = require("awful.widget.watch")
---local lain = require("lain")
---local wibox = require("wibox")
+local watch = require("awful.widget.watch")
+local lain = require("lain")
+local logout_menu_widget = require("awesome-wm-widgets.logout-menu-widget.logout-menu")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
@@ -123,7 +123,7 @@ tbox_separator2 = wibox.widget.textbox("  ")
 tbox_separator1 = wibox.widget.textbox(" ")
 
 -- Separator
-tbox_separator = wibox.widget.textbox("| ")
+bar_separator = wibox.widget.textbox("| ")
 
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
@@ -138,32 +138,27 @@ clock:set_shape(gears.shape.rectangle)
 --mytextclock = wibox.widget.textclock()
 
 -- Volume
-local volume = awful.widget.watch('/home/zg/.config/awesome/volume-control')
-local volumew = wibox.widget.background()
-volumew:set_widget(volume)
-volumew:set_bg("#1a1a1a")
-volumew:set_shape(gears.shape.rectangle)
+local volume_widget = require('awesome-wm-widgets.volume-widget.volume')
+
+--Brightness
+local brightness_widget = require("awesome-wm-widgets.brightness-widget.brightness")
+
+--Battery
+local batteryarc_widget = require("awesome-wm-widgets.batteryarc-widget.batteryarc")
 
 -- Cpu
-local cpu = awful.widget.watch('/home/zg/.config/awesome/cpu-wibox')
---local cpuw = wibox.widget.background()
---cpuw:set_widget(cpu)
---cpuw:set_bg("#1a1a1a")
---cpuw:set_shape(gears.shape.rectangle)
+local cpu = lain.widget.cpu {
+	settings = function()
+		widget:set_markup(" CPU " .. cpu_now.usage.. "% ")
+	end
+}
 
 -- Ram
-local ram = awful.widget.watch('/home/zg/.config/awesome/ram-wibox')
---local ramw = wibox.widget.background()
---ramw:set_widget(ram)
---ramw:set_bg("#1a1a1a")
---ramw:set_shape(gears.shape.rectangle)
-
--- Wheather
-local weather = awful.widget.watch('/home/zg/.config/awesome/weather-wibox')
---local weatherw = wibox.widget.background()
---weatherw:set_widget(weather)
---weatherw:set_bg("#1a1a1a")
---weatherw:set_shape(gears.shape.rectangle)
+local ram_mem = lain.widget.mem {
+	settings = function()
+		widget:set_markup(" RAM " .. mem_now.perc.. "% ")
+	end
+}
 
 -- Updates
 local update = awful.widget.watch('/home/zg/.config/awesome/updates-wibox')
@@ -259,8 +254,9 @@ awful.screen.connect_for_each_screen(function(s)
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
-        filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+       -- filter  = awful.widget.tasklist.filter.currenttags,
+       --filter = awful.widget.tasklist.filter.focused
+       -- buttons = tasklist_buttons
     }
 
     -- Create the wibox
@@ -282,10 +278,15 @@ awful.screen.connect_for_each_screen(function(s)
         s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            tbox_separator,
             mykeyboardlayout,
+	    volume_widget{widget_type = 'icon_and_text'},
+	    brightness_widget{type = 'icon_and_text', program = 'xbacklight', step = 2, },
+	    cpu.widget,
+	    ram_mem,
+	    batteryarc_widget({show_current_level = true, arc_thickness = 1, size = 16,}),
             wibox.widget.systray(),
             mytextclock,
+	    logout_menu_widget(),
             s.mylayoutbox,
 	    tbox_separator1
         },
@@ -298,9 +299,9 @@ end)
 ------------------------------------------------
 
 root.buttons(gears.table.join(
-    awful.button({ }, 3, function () mymainmenu:toggle() end),
-    awful.button({ }, 4, awful.tag.viewnext),
-    awful.button({ }, 5, awful.tag.viewprev)
+    awful.button({ }, 3, function () mymainmenu:toggle() end)
+   -- awful.button({ }, 4, awful.tag.viewnext),
+   -- awful.button({ }, 5, awful.tag.viewprev)
 ))
 -- }}}
 
@@ -316,8 +317,6 @@ globalkeys = gears.table.join(
         {description = "open a browser", group = "launcher"}),
     awful.key({ modkey,           }, "l" , function () awful.spawn(fm) end,
         {description = "open a file manager", group = "launcher"}),
-    awful.key({ modkey         },   "p",      function () awful.spawn("rofi -show drun -display-drun ' Exec ' ") end,
-        {description = "rofi-apps", group = "Personal launchers"}),
     awful.key({ modkey         },   "x",      function () awful.spawn("rofi -show drun -display-drun ' Exec ' ") end,
         {description = "rofi-apps", group = "Personal launchers"}),
     --[[--awful.key({ modkey		},   "0",	function () awful.spawn("/home/zg/.config/awesome/rofi/power-menu.sh") end,
@@ -335,12 +334,22 @@ globalkeys = gears.table.join(
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
             {description="show help", group="awesome"}),
 
+    --Volume Keybidings
+	awful.key({ modkey }, "]", function() volume_widget:inc(5) end),
+	awful.key({ modkey }, "[", function() volume_widget:dec(5) end),
+	awful.key({ modkey }, "\\", function() volume_widget:toggle() end),
+
+   --Brightness Keybidings
+   --[[ awful.key({ modkey         }, "Up", function () brightness_widget:inc() end,
+		{description = "increase brightness", group = "brightness"}),
+	awful.key({ modkey }, "Down", function () brightness_widget:dec() end,
+		{description = "decrease brightness", group = "brightness"}), ]]--
 
     --Menu Keybiding
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end,
     {description = "show menu", group = "awesome"}),
 
-    -- Control Clients
+    --Swap Tags
     awful.key({ "Control",           }, "j",   awful.tag.viewprev,
     {description = "view previous", group = "tag"}),
     awful.key({ "Control",           }, "k",  awful.tag.viewnext,
@@ -355,7 +364,7 @@ globalkeys = gears.table.join(
         --Monitor Swap
     awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end,
         {description = "focus the next screen", group = "screen"}),
-    --Clients Focus Swap
+    --Clients Place  Swap
     awful.key({ modkey }, "j", function () awful.client.swap.byidx(  1)    end,
         {description = "swap with next client by index", group = "client"}),
     awful.key({ modkey }, "k", function () awful.client.swap.byidx( -1)    end,
@@ -370,10 +379,19 @@ globalkeys = gears.table.join(
         {description = "increase the number of columns", group = "layout"}),
     awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1, nil, true)    end,
         {description = "decrease the number of columns", group = "layout"}),
-     --Swap Layouts
+    --Swap Layouts
         awful.key({ modkey,           }, "space", function () awful.layout.inc( 1)                end,
         {description = "select next", group = "layout"}),
 
+    --Swap Focus Client: mod4 + tab 
+    awful.key({ modkey,           }, "Tab",
+        function ()
+            awful.client.focus.history.previous()
+            if client.focus then
+                client.focus:raise()
+            end
+        end,
+        {description = "go back", group = "client"}),
 
     --Awesome Quit/Restart Keybidings 
     awful.key({ modkey, "Control" }, "r", awesome.restart,
@@ -591,10 +609,10 @@ awful.rules.rules = {
         }
       }, properties = { floating = true }},
 
-    -- Add titlebars to normal clients and dialogs
-    --{ rule_any = {type = { "normal", "dialog" }
-    --}, properties = { titlebars_enabled = true }
-    --},
+ --[[-- Add titlebars to normal clients and dialogs
+    { rule_any = {type = { "normal", "dialog" }
+    }, properties = { titlebars_enabled = true }
+    }, ]]--
 
     -- Set Firefox to always map on the tag named "2" on screen 1.
     -- { rule = { class = "Firefox" },
