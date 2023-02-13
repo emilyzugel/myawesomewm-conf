@@ -123,7 +123,7 @@ tbox_separator2 = wibox.widget.textbox("  ")
 tbox_separator1 = wibox.widget.textbox(" ")
 
 -- Separator
-bar_separator = wibox.widget.textbox("| ")
+bar_separator = wibox.widget.textbox("  ||  ")
 
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
@@ -267,27 +267,32 @@ awful.screen.connect_for_each_screen(function(s)
         layout = wibox.layout.align.horizontal,
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
-            tbox_separato1,
+            tbox_separator2,
 	    --mylauncher,
-	    tbox_separator2,
 	    s.mytaglist,
-	    tbox_separator1,
             s.mypromptbox,
-	    tbox_separator1,
         },
         s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             mykeyboardlayout,
+	    wibox.widget.systray(),
+	    bar_separator,
 	    volume_widget{widget_type = 'icon_and_text'},
+	    bar_separator,
 	    brightness_widget{type = 'icon_and_text', program = 'xbacklight', step = 2, },
+	    bar_separator,
 	    cpu.widget,
+	    bar_separator,
 	    ram_mem,
+	    bar_separator,
 	    batteryarc_widget({show_current_level = true, arc_thickness = 1, size = 16,}),
-            wibox.widget.systray(),
+            bar_separator,
             mytextclock,
+	    bar_separator,
 	    logout_menu_widget(),
-            s.mylayoutbox,
+            tbox_separator2,
+	    s.mylayoutbox,
 	    tbox_separator1
         },
     }
