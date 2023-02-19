@@ -232,7 +232,7 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({"P", "ᗣ", "ᗧ", "•••", "M", "ᗣ", "N" }, s, awful.layout.layouts[1])
+    awful.tag({" ᗧ ", " ••• ", " ᗣ ", " ᗣ ", " ᗣ ", " ᗣ " }, s, awful.layout.layouts[1])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -708,3 +708,4 @@ awful.spawn.with_shell("xset s off")         --to not let the screen sleep
 --awful.spawn.with_shell("!xrandr --restore")
 --awful.spawn.with_shell("xset -dpms")
 --awful.spawn.with_shell("picom --experimental-backends") 
+
