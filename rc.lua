@@ -20,6 +20,7 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
+local vicious = require("vicious")
 local hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
@@ -280,13 +281,13 @@ awful.screen.connect_for_each_screen(function(s)
 	    bar_separator,
 	    volume_widget{widget_type = 'icon_and_text'},
 	    bar_separator,
-	    brightness_widget{type = 'icon_and_text', program = 'xbacklight', step = 2, },
+	    brightness_widget{type = 'icon_and_text', program = 'light', step = 2, tooltip = true, percentage = true },
 	    bar_separator,
 	    cpu.widget,
 	    bar_separator,
 	    ram_mem,
 	    bar_separator,
-	    batteryarc_widget({show_current_level = true, arc_thickness = 1, size = 16,}),
+    	    batteryarc_widget({show_current_level = true, arc_thickness = 2, size = 16, bg_color = "#f5f5f5", charging_color = "#161130", low_level_color = "#B74444", medium_level_color = "#584F9B"}),
             bar_separator,
             mytextclock,
 	    bar_separator,
@@ -345,10 +346,10 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "\\", function() volume_widget:toggle() end),
 
    --Brightness Keybidings
-   --[[ awful.key({ modkey         }, "Up", function () brightness_widget:inc() end,
+	awful.key({ "XF86WakeUp" }, "'", function () brightness_widget:inc() end,		
 		{description = "increase brightness", group = "brightness"}),
-	awful.key({ modkey }, "Down", function () brightness_widget:dec() end,
-		{description = "decrease brightness", group = "brightness"}), ]]--
+	awful.key({ "XF86WakeUp", "Shift"}, "'", function () brightness_widget:dec() end,	
+		{description = "decrease brightness", group = "brightness"}),
 
     --Menu Keybiding
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end,
