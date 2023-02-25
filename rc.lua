@@ -1,46 +1,34 @@
 -- If LuaRocks is installed, make sure that packages installed through it are
--- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
-
-------------------------------------------------
------------------- LIBRARIES -------------------
-------------------------------------------------
-
+---------------------------------------------------------------------------------------------------
+------ | LIBRARIES | ------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
-            require("awful.autofocus")
--- Widget and layout library
+require("awful.autofocus")
+
 local wibox = require("wibox")
 local watch = require("awful.widget.watch")
 local lain = require("lain")
 local logout_menu_widget = require("awesome-wm-widgets.logout-menu-widget.logout-menu")
--- Theme handling library
+
 local beautiful = require("beautiful")
--- Notification library
+
 local naughty = require("naughty")
 local menubar = require("menubar")
 local vicious = require("vicious")
 local hotkeys_popup = require("awful.hotkeys_popup")
--- Enable hotkeys help widget for VIM and other apps
--- when client with a matching name is opened:
+
 require("awful.hotkeys_popup.keys")
---beautiful.font = "Ubuntu 8"
-
-
-------------------------------------------------
--------------------- ERROR ---------------------
-------------------------------------------------
-
--- Check if awesome encountered an error during startup and fell back to
--- another config (This code will only ever execute for the fallback config)
+---------------------------------------------------------------------------------------------------
+------ | ERROR | ----------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 if awesome.startup_errors then
     naughty.notify({ preset = naughty.config.presets.critical,
                      title = "Oops, there were errors during startup!",
                      text = awesome.startup_errors })
 end
-
--- Handle runtime errors after startup
 do
     local in_error = false
     awesome.connect_signal("debug::error", function (err)
@@ -53,33 +41,23 @@ do
         in_error = false
     end)
 end
--- }}}
-
-
-------------------------------------------------
-------------------- OPTIONS --------------------
-------------------------------------------------
-
--- {{{ Variable definitions
--- Themes define colours, icons, font and wallpapers.
+----------------------------------------------------------------------------------------------------
+-------| THEME |------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 beautiful.init(gears.filesystem.get_themes_dir() .. "mytheme/theme.lua")
---beautiful.font = "Ubuntu 8"
 
--- This is used later as the default terminal and editor to run.
+---------------------------------------------------------------------------------------------------
+-------| VARIABLES ~ OPTIONS | --------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+modkey = "Mod4"
 terminal = "alacritty"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. "vim"
 browser = "firefox"
 fm = "pcmanfm"
-
--- Default modkey.
--- Usually, Mod4 is the key with a logo between Control and Alt.
--- If you do not like this or do not have such a key,
--- I suggest you to remap Mod4 to another key using xmodmap or other tools.
--- However, you can use another modifier like Mod1, but it may interact with others.
-modkey = "Mod4"
-
--- Table of layouts to cover with awful.layout.inc, order matters.
+--------------------------------------------------------------------------------------------------
+-------| LAYOUTS | -------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
 awful.layout.layouts = {
     awful.layout.suit.spiral.dwindle,
     --awful.layout.suit.spiral,
@@ -87,38 +65,29 @@ awful.layout.layouts = {
     awful.layout.suit.tile.left,
     --awful.layout.suit.floating
 }
--- }}}
-
-------------------------------------------------
--------------------- MENU ----------------------
-------------------------------------------------
-
--- Create a launcher widget and a main menu
+--------------------------------------------------------------------------------------------------
+----- | MENU |  ----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
 myawesomemenu = {
-   { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
-   { "manual", terminal .. " -e man awesome" },
-   { "edit config", editor_cmd .. " " .. awesome.conffile },
-   { "restart", awesome.restart },
-   { "quit", function() awesome.quit() end },
+	{ "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
+	{ "manual", terminal .. " -e man awesome" },
+	{ "edit config", editor_cmd .. " " .. awesome.conffile },
+	{ "restart", awesome.restart },
+	{ "quit", function() awesome.quit() end },
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
-                                  }
-                        })
+mymainmenu = awful.menu({ items = { 
+	{ "awesome", myawesomemenu, beautiful.awesome_icon },
+        { "open terminal", terminal }
+}
+})
 
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
+mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon, menu = mymainmenu })
 
--- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
--- }}}
-
-
-------------------------------------------------
-------------------- WIDGETS --------------------
-------------------------------------------------
-
+---------------------------------------------------------------------------------------------------
+----- | WIDGETS | ---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- Separator Blanc
 tbox_separator2 = wibox.widget.textbox("  ")
 tbox_separator1 = wibox.widget.textbox(" ")
@@ -145,7 +114,7 @@ local volume_widget = require('awesome-wm-widgets.volume-widget.volume')
 local brightness_widget = require("awesome-wm-widgets.brightness-widget.brightness")
 
 --Battery
-local batteryarc_widget = require("awesome-wm-widgets.batteryarc-widget.batteryarc")
+local battery_widget = require("awesome-wm-widgets.battery-widget.battery")
 
 -- Cpu
 local cpu = lain.widget.cpu {
@@ -161,18 +130,14 @@ local ram_mem = lain.widget.mem {
 	end
 }
 
--- Updates
-local update = awful.widget.watch('/home/zg/.config/awesome/updates-wibox')
-local updatew = wibox.widget.background()
-updatew:set_widget(update)
-updatew:set_bg("#1a1a1a")
-updatew:set_shape(gears.shape.rectangular_tag)
+--FS (Filesystem Widget)
+local fs_widget = require("awesome-wm-widgets.fs-widget.fs-widget")
 
-
-------------------------------------------------
--------------------- WIBAR ---------------------
-------------------------------------------------
-
+--Net Speed
+local net_speed_widget = require("awesome-wm-widgets.net-speed-widget.net-speed")
+---------------------------------------------------------------------------------------------
+----- | WIBAR | ------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
                     awful.button({ }, 1, function(t) t:view_only() end),
@@ -279,6 +244,10 @@ awful.screen.connect_for_each_screen(function(s)
             mykeyboardlayout,
 	    wibox.widget.systray(),
 	    bar_separator,
+	    net_speed_widget(),
+	    bar_separator,
+	    fs_widget({ mounts = { '/', '/home', '/boot', '/tmp'} }),
+	    bar_separator,
 	    volume_widget{widget_type = 'icon_and_text'},
 	    bar_separator,
 	    brightness_widget{type = 'icon_and_text', program = 'light', step = 2, tooltip = true, percentage = true },
@@ -287,7 +256,7 @@ awful.screen.connect_for_each_screen(function(s)
 	    bar_separator,
 	    ram_mem,
 	    bar_separator,
-    	    batteryarc_widget({show_current_level = true, arc_thickness = 2, size = 16, bg_color = "#f5f5f5", charging_color = "#161130", low_level_color = "#B74444", medium_level_color = "#584F9B"}),
+	    battery_widget({show_current_level = true}),
             bar_separator,
             mytextclock,
 	    bar_separator,
@@ -298,23 +267,17 @@ awful.screen.connect_for_each_screen(function(s)
         },
     }
 end)
--- }}}
-
-------------------------------------------------
------------------ MOUSE KEYBINDINGS ------------
-------------------------------------------------
-
+---------------------------------------------------------------------------------------------------------
+----- | MOUSE KEYBINDINGS | -----------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
 root.buttons(gears.table.join(
     awful.button({ }, 3, function () mymainmenu:toggle() end)
    -- awful.button({ }, 4, awful.tag.viewnext),
    -- awful.button({ }, 5, awful.tag.viewprev)
 ))
--- }}}
-
-------------------------------------------------
------------------ KEYBINDINGS ------------------
-------------------------------------------------
-
+----------------------------------------------------------------------------------------------------------
+----- | KEYBINDINGS |-------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
 --Awesome Global Keybidings
 globalkeys = gears.table.join(
 
@@ -346,9 +309,9 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "\\", function() volume_widget:toggle() end),
 
    --Brightness Keybidings
-	awful.key({ "XF86WakeUp" }, "'", function () brightness_widget:inc() end,		
+	awful.key({ modkey }, "=", function () brightness_widget:inc() end,		
 		{description = "increase brightness", group = "brightness"}),
-	awful.key({ "XF86WakeUp", "Shift"}, "'", function () brightness_widget:dec() end,	
+	awful.key({ modkey, "Shift"}, "=", function () brightness_widget:dec() end,	
 		{description = "decrease brightness", group = "brightness"}),
 
     --Menu Keybiding
@@ -561,13 +524,9 @@ clientbuttons = gears.table.join(
 
 -- Set keys
 root.keys(globalkeys)
--- }}}
-
-
-------------------------------------------------
--------------------- RULES ---------------------
-------------------------------------------------
-
+--------------------------------------------------------------------------------------------
+----- | RULES |-----------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
     -- All clients will match this rule.
@@ -624,12 +583,10 @@ awful.rules.rules = {
     -- { rule = { class = "Firefox" },
     --   properties = { screen = 1, tag = "2" } },
 }
--- }}}
-
--------------------------------------------------
--------------------- SIGNALS --------------------
--------------------------------------------------
-
+--]]
+---------------------------------------------------------------------------------------------
+----- | SIGNALS |-----------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
 -- Signal function to execute when a new client appears.
 client.connect_signal("manage", function (c)
     -- Set the windows at the slave,
@@ -692,15 +649,9 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus  end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal  end)
 
--------------------------------------------------
---------------------- GAPS ----------------------
--------------------------------------------------
-beautiful.useless_gap = 4
- 
-
-------------------------------------------------
--------------------- START ---------------------
-------------------------------------------------
+-------------------------------------------------------------------------------------------
+---- | START |-----------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
 awful.spawn.with_shell("nitrogen --restore")
 --awful.spawn.with_shell('polkit-xfce-authentication-agent-1') --autorization app to usb and external hdd
 awful.spawn.with_shell("xset r rate 300 50") --to not let the screen sleep
